@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
   Eigen::MatrixXi F;
   Eigen::MatrixXd V;
-  igl::read_triangle_mesh( argc>1?argv[1]: TUTORIAL_SHARED_PATH "/beetle.off",V,F);
+  igl::read_triangle_mesh( argc>1?argv[1]: TUTORIAL_SHARED_PATH "/sphere.obj",V,F);
   double t = std::pow(igl::avg_edge_length(V,F),2);
 
   // Precomputation
