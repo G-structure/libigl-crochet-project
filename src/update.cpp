@@ -1,6 +1,7 @@
 #include "update.h"
 #include <igl/heat_geodesics.h>
 #include <igl/unproject_onto_mesh.h>
+#include <igl/grad.h>
 
 bool update(
   const Eigen::MatrixXd & V,
@@ -12,7 +13,9 @@ bool update(
   const Eigen::Matrix4f& proj,
   const Eigen::Vector4f& viewport,
   const igl::HeatGeodesicsData<double>& data,
-  Eigen::VectorXd& D)
+  Eigen::VectorXd& D,
+  const Eigen::SparseMatrix<double>& G,
+  Eigen::MatrixXd& GF)
 {
   int fid;
   Eigen::Vector3f bc;
@@ -45,6 +48,8 @@ bool update(
         D += Dc*bc(cid);
       }
     }
+
+    GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     return true;
   }
   return false;

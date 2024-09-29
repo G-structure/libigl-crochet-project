@@ -1,4 +1,5 @@
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 namespace igl
 {
   template <typename Scalar>
@@ -15,4 +16,6 @@ bool update(
   const Eigen::Matrix4f& proj,
   const Eigen::Vector4f& viewport,
   const igl::HeatGeodesicsData<double>& data,
-  Eigen::VectorXd& D);
+  Eigen::VectorXd& D,
+  const Eigen::SparseMatrix<double>& G,
+  Eigen::MatrixXd& GF);

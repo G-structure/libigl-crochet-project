@@ -5,6 +5,9 @@
 #include <igl/avg_edge_length.h>
 #include <igl/opengl/glfw/Viewer.h>
 #include <iostream>
+#include <igl/avg_edge_length.h>
+#include <igl/barycenter.h>
+#include <igl/grad.h>
 
 int main(int argc, char *argv[])
 {
@@ -32,13 +35,28 @@ int main(int argc, char *argv[])
     const double x = viewer.current_mouse_x;
     const double y = viewer.core().viewport(3) - viewer.current_mouse_y;
     Eigen::VectorXd D;
+    Eigen::MatrixXd GF;
+    Eigen::SparseMatrix<double> G;
+    igl::grad(V,F,G);
     if(::update(
       V,F,t,x,y,
       viewer.core().view,viewer.core().proj,viewer.core().viewport,
       data,
-      D))
+      D,
+      G,
+      GF))
     {
+      ## TODO need to move GF_mag, max_size into the update function
+      ## TODO need to fix error where gradent arrows are not being cleared on update
       viewer.data().set_data(D);
+      const Eigen::VectorXd GF_mag = GF.rowwise().norm();
+      // Average edge length divided by average gradient (for scaling)
+      const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();
+      // Draw a black segment in direction of gradient at face barycenters
+      Eigen::MatrixXd BC;
+      igl::barycenter(V,F,BC);
+      const Eigen::RowVector3d black(0,0,0);
+      viewer.data().add_edges(BC,BC+max_size*GF, black);
       return true;
     }
     return false;
