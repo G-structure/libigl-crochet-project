@@ -2,6 +2,7 @@
 #include <igl/heat_geodesics.h>
 #include <igl/unproject_onto_mesh.h>
 #include <igl/grad.h>
+#include <igl/barycenter.h>
 
 bool update(
   const Eigen::MatrixXd & V,
@@ -15,10 +16,13 @@ bool update(
   const igl::HeatGeodesicsData<double>& data,
   Eigen::VectorXd& D,
   const Eigen::SparseMatrix<double>& G,
-  Eigen::MatrixXd& GF)
+  Eigen::MatrixXd& GF,
+  Eigen::MatrixXd& BaryCenter,
+  Eigen::MatrixXd& J_Delta_F_arrow)
 {
   int fid;
   Eigen::Vector3f bc;
+  igl::barycenter(V,F,BaryCenter);
   // Cast a ray in the view direction starting from the mouse position
   if(igl::unproject_onto_mesh(Eigen::Vector2f(x,y), view,
     proj, viewport, V, F, fid, bc))
@@ -50,6 +54,10 @@ bool update(
     }
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
+    const Eigen::VectorXd GF_mag = GF.rowwise().norm();
+    // Average edge length divided by average gradient (for scaling)
+    const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();
+    J_Delta_F_arrow = BaryCenter+max_size*GF;
     return true;
   }
   return false;

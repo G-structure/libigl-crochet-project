@@ -6,7 +6,6 @@
 #include <igl/opengl/glfw/Viewer.h>
 #include <iostream>
 #include <igl/avg_edge_length.h>
-#include <igl/barycenter.h>
 #include <igl/grad.h>
 
 int main(int argc, char *argv[])
@@ -37,6 +36,8 @@ int main(int argc, char *argv[])
     Eigen::VectorXd D;
     Eigen::MatrixXd GF;
     Eigen::SparseMatrix<double> G;
+    Eigen::MatrixXd BaryCenter;
+    Eigen::MatrixXd J_Delta_F_arrow;
     igl::grad(V,F,G);
     if(::update(
       V,F,t,x,y,
@@ -44,19 +45,15 @@ int main(int argc, char *argv[])
       data,
       D,
       G,
-      GF))
+      GF,
+      BaryCenter,
+      J_Delta_F_arrow))
     {
-      ## TODO need to move GF_mag, max_size into the update function
-      ## TODO need to fix error where gradent arrows are not being cleared on update
       viewer.data().set_data(D);
-      const Eigen::VectorXd GF_mag = GF.rowwise().norm();
-      // Average edge length divided by average gradient (for scaling)
-      const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();
+      viewer.data().clear_edges();
       // Draw a black segment in direction of gradient at face barycenters
-      Eigen::MatrixXd BC;
-      igl::barycenter(V,F,BC);
       const Eigen::RowVector3d black(0,0,0);
-      viewer.data().add_edges(BC,BC+max_size*GF, black);
+      viewer.data().add_edges(BaryCenter,J_Delta_F_arrow, black);
       return true;
     }
     return false;

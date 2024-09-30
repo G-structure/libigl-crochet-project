@@ -18,4 +18,6 @@ bool update(
   const igl::HeatGeodesicsData<double>& data,
   Eigen::VectorXd& D,
   const Eigen::SparseMatrix<double>& G,
-  Eigen::MatrixXd& GF);
+  Eigen::MatrixXd& GF,
+  Eigen::MatrixXd& BaryCenter,
+  Eigen::MatrixXd& J_Delta_F_arrow);
