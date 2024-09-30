@@ -3,6 +3,7 @@
 #include <igl/unproject_onto_mesh.h>
 #include <igl/grad.h>
 #include <igl/barycenter.h>
+#include <igl/per_vertex_normals.h>
 
 bool update(
   const Eigen::MatrixXd & V,
@@ -54,10 +55,32 @@ bool update(
     }
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
-    const Eigen::VectorXd GF_mag = GF.rowwise().norm();
+    Eigen::MatrixXd N_vertices;
+    igl::per_vertex_normals(V, F, N_vertices);
+
+    Eigen::MatrixXd GF_rotated = Eigen::MatrixXd::Zero(F.rows(), 3);
+    for (int i = 0; i < F.rows(); i++) {
+        for (int j = 0; j < 3; j++) {
+            int vid = F(i, j);
+            Eigen::Vector3d normal = N_vertices.row(vid);
+            Eigen::Vector3d gradient = GF.row(i);
+
+            // Project gradient onto tangent plane
+            Eigen::Vector3d tangent_gradient = gradient - gradient.dot(normal) * normal;
+
+            // Rotate by π/2 in tangent plane
+            Eigen::Vector3d rotated = normal.cross(tangent_gradient);
+
+            GF_rotated.row(i) += rotated / 3.0; // Average over vertices of the face
+        }
+    }
+
+    // Use GF_rotated instead of GF for visualization
+    const Eigen::VectorXd GF_mag = GF_rotated.rowwise().norm();
+
     // Average edge length divided by average gradient (for scaling)
     const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();
-    J_Delta_F_arrow = BaryCenter+max_size*GF;
+    J_Delta_F_arrow = BaryCenter+max_size*GF_rotated;
     return true;
   }
   return false;
