@@ -33,7 +33,8 @@ bool update(
   Eigen::MatrixXd& J_Delta_F_arrow,
   Eigen::MatrixXd& Cut_Path,
   Eigen::MatrixXd & V_cut,
-  Eigen::MatrixXi & F_cut)
+  Eigen::MatrixXi & F_cut,
+  Eigen::MatrixXd & B)
 {
   int fid;
   Eigen::Vector3f bc;
@@ -177,45 +178,29 @@ bool update(
     std::cout << "Original D size: " << D.size() << std::endl;
     std::cout << "D_cut size: " << D_cut.size() << std::endl;
 
-    // Find boundary vertices of the cut mesh
-    Eigen::VectorXi boundary;
-    igl::boundary_loop(F_cut, boundary);
+    // TODO: Calculate B: the longest connected path on Cut_Path along which D_cut is strictly monotone
+    B = Cut_Path;
 
-    // Get D values for boundary vertices
-    Eigen::VectorXd D_boundary(boundary.size());
-    for (int i = 0; i < boundary.size(); ++i) {
-        D_boundary(i) = D_cut(boundary(i));
-    }
-
-    // Find the longest monotone path
-    std::vector<int> B;
-    std::vector<int> current_path;
-    bool increasing = true;
-    double prev_value = D_boundary(0);
-
-    for (int i = 0; i < boundary.size(); ++i) {
-        if (D_boundary(i) > prev_value && increasing) {
-            current_path.push_back(boundary(i));
-        } else if (D_boundary(i) < prev_value && !increasing) {
-            current_path.push_back(boundary(i));
-        } else {
-            if (current_path.size() > B.size()) {
-                B = current_path;
-            }
-            current_path.clear();
-            current_path.push_back(boundary(i));
-            increasing = !increasing;
-        }
-        prev_value = D_boundary(i);
-    }
-
-    // Check if the last path is the longest
-    if (current_path.size() > B.size()) {
-        B = current_path;
-    }
-
-    std::cout << "Longest monotone boundary path (B) size: " << B.size() << std::endl;
+    std::cout << "Longest monotone path size: " << B.rows() << std::endl;
     std::cout << "Cut path size: " << Cut_Path.rows() << std::endl;
+
+    // Output the values for D_cut along B
+    std::cout << "D_cut values along B:" << std::endl;
+    for (int i = 0; i < B.rows(); ++i) {
+        // Find the index of the vertex in V_cut that matches B.row(i)
+        int vertex_index = -1;
+        for (int j = 0; j < V_cut.rows(); ++j) {
+            if (V_cut.row(j) == B.row(i)) {
+                vertex_index = j;
+                break;
+            }
+        }
+        if (vertex_index != -1) {
+            std::cout << "Vertex " << i << ": " << D_cut(vertex_index) << std::endl;
+        } else {
+            std::cout << "Vertex " << i << ": Not found in V_cut" << std::endl;
+        }
+    }
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     Eigen::MatrixXd N_vertices;

@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     Eigen::MatrixXd Cut_Path;
     Eigen::MatrixXd V_cut;
     Eigen::MatrixXi F_cut;
+    Eigen::MatrixXd B;
 
     igl::grad(V,F,G);
     if(::update(
@@ -54,7 +55,8 @@ int main(int argc, char *argv[])
       J_Delta_F_arrow,
       Cut_Path,
       V_cut,
-      F_cut))
+      F_cut,
+      B))
     {
       viewer.data().clear();
       viewer.data().set_mesh(V_cut, F_cut);
@@ -65,7 +67,8 @@ int main(int argc, char *argv[])
       const Eigen::RowVector3d black(0,0,0);
       viewer.data().add_edges(BaryCenter,J_Delta_F_arrow, black);
 
-      viewer.data().add_edges(Cut_Path.topRows(Cut_Path.rows()-1), Cut_Path.bottomRows(Cut_Path.rows()-1), Eigen::RowVector3d(1,0,0));
+      // viewer.data().add_edges(Cut_Path.topRows(Cut_Path.rows()-1), Cut_Path.bottomRows(Cut_Path.rows()-1), Eigen::RowVector3d(1,0,0));
+      viewer.data().add_edges(B.topRows(B.rows()-1), B.bottomRows(B.rows()-1), Eigen::RowVector3d(1,1,0));
 
       return true;
     }
