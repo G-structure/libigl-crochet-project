@@ -67,6 +67,61 @@ bool update(
     std::cout << "Min: " << extreme_vertices.row(0) << std::endl;
     std::cout << "Max: " << extreme_vertices.row(1) << std::endl;
 
+    // Find the shortest path from min to max vertex
+    Eigen::VectorXi prev(V.rows());
+    Eigen::VectorXd min_dist(V.rows());
+    std::priority_queue<std::pair<double, int>,
+                        std::vector<std::pair<double, int>>,
+                        std::greater<std::pair<double, int>>> pq;
+
+    // Initialize distances
+    min_dist.setConstant(std::numeric_limits<double>::infinity());
+    min_dist(min_index) = 0;
+    pq.push({0, min_index});
+
+    // Dijkstra's algorithm
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+
+        if (u == max_index) break;
+
+        for (int i = 0; i < F.rows(); i++) {
+        for (int j = 0; j < 3; j++) {
+            if (F(i, j) == u) {
+            for (int k = 0; k < 3; k++) {
+                int v = F(i, k);
+                double weight = (V.row(u) - V.row(v)).norm();
+                if (min_dist(u) + weight < min_dist(v)) {
+                min_dist(v) = min_dist(u) + weight;
+                prev(v) = u;
+                pq.push({min_dist(v), v});
+                }
+            }
+            }
+        }
+        }
+    }
+
+    // Reconstruct path
+    std::vector<int> path;
+    for (int v = max_index; v != min_index; v = prev(v)) {
+        path.push_back(v);
+    }
+    path.push_back(min_index);
+    std::reverse(path.begin(), path.end());
+
+    // Convert path to Cut_Path
+    Cut_Path.resize(path.size(), 3);
+    for (int i = 0; i < path.size(); i++) {
+        Cut_Path.row(i) = V.row(path[i]);
+    }
+
+    std::cout << "Cut Path:" << std::endl;
+    for (int i = 0; i < Cut_Path.rows(); i++) {
+        std::cout << Cut_Path.row(i) << std::endl;
+    }
+
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     Eigen::MatrixXd N_vertices;
     igl::per_vertex_normals(V, F, N_vertices);

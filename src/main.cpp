@@ -56,6 +56,9 @@ int main(int argc, char *argv[])
       // Draw a black segment in direction of gradient at face barycenters
       const Eigen::RowVector3d black(0,0,0);
       viewer.data().add_edges(BaryCenter,J_Delta_F_arrow, black);
+
+      viewer.data().add_edges(Cut_Path.topRows(Cut_Path.rows()-1), Cut_Path.bottomRows(Cut_Path.rows()-1), Eigen::RowVector3d(1,0,0));
+
       return true;
     }
     return false;
