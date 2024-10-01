@@ -229,12 +229,23 @@ bool update(
     const Eigen::VectorXd GF_mag = GF_rotated.rowwise().norm();
 
     g = compute_g(V, F, D, GF_rotated, B, G);
+
     std::cout << "Computed g. Size: " << g.size() << std::endl;
+    std::cout << "g values:" << std::endl;
+    for (int i = 0; i < g.size(); ++i) {
+        std::cout << "g[" << i << "] = " << g[i] << std::endl;
+    }
+    // const Eigen::VectorXd g_mag = g.rowwise().norm();
+    // const double max_size_g = igl::avg_edge_length(V,F) / g_mag.mean();
+    // g = BaryCenter+max_size_g*g;
 
     // Average edge length divided by average gradient (for scaling)
-    const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();
-    J_Delta_F_arrow = BaryCenter+max_size*GF_rotated;
-    D = D_cut;
+    const double max_size_jf = igl::avg_edge_length(V,F) / GF_mag.mean();
+    J_Delta_F_arrow = BaryCenter+max_size_jf*GF_rotated;
+    // D = D_cut;
+    std::cout << "Shape of G: " << G.rows() << " x " << G.cols() << std::endl;
+    std::cout << "Shape of GF: " << GF.rows() << " x " << GF.cols() << std::endl;
+    std::cout << "Shape of GF_rotated: " << GF_rotated.rows() << " x " << GF_rotated.cols() << std::endl;
     return true;
   }
   return false;

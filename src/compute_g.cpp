@@ -22,7 +22,7 @@ Eigen::VectorXd compute_g(
     std::cout << "G dimensions: " << G.rows() << "x" << G.cols() << std::endl;
 
     // Initialize g with random values
-    Eigen::VectorXd g = Eigen::VectorXd::Random(V.rows());
+    Eigen::VectorXd g = Eigen::VectorXd::Random(V.rows()) * 0.01;
 
     // Set g(B) = 0
     for (int i = 0; i < B.rows(); ++i) {
@@ -41,7 +41,7 @@ Eigen::VectorXd compute_g(
     std::cout << "L dimensions: " << L.rows() << "x" << L.cols() << std::endl;
 
     // Gradient descent parameters
-    double learning_rate = 0.01;
+    double learning_rate = 0.001;
     int max_iterations = 1000;
     double tolerance = 1e-6;
 
@@ -51,19 +51,19 @@ Eigen::VectorXd compute_g(
         // Compute gradient of g
         Eigen::MatrixXd grad_g = Eigen::Map<const Eigen::MatrixXd>((G*g).eval().data(),F.rows(),3);
 
-        std::cout << "grad_g dimensions: " << grad_g.rows() << "x" << grad_g.cols() << std::endl;
+        // std::cout << "grad_g dimensions: " << grad_g.rows() << "x" << grad_g.cols() << std::endl;
 
         // Compute objective function
         Eigen::VectorXd objective = (GF.array() * grad_g.array() - 1).square().rowwise().sum();
 
-        std::cout << "objective dimensions: " << objective.rows() << "x" << objective.cols() << std::endl;
+        // std::cout << "objective dimensions: " << objective.rows() << "x" << objective.cols() << std::endl;
 
         double total_objective = objective.sum();
 
         // Compute gradient of objective function
         Eigen::MatrixXd temp = (GF.array() * (GF.array() * grad_g.array() - 1)).matrix().reshaped();
         Eigen::VectorXd grad_objective = 2 * G.transpose() * Eigen::Map<Eigen::VectorXd>(temp.data(), F.rows() * 3, 1);
-        std::cout << "grad_objective dimensions: " << grad_objective.rows() << "x" << grad_objective.cols() << std::endl;
+        // std::cout << "grad_objective dimensions: " << grad_objective.rows() << "x" << grad_objective.cols() << std::endl;
 
         // Update g
         g -= learning_rate * grad_objective;
@@ -79,8 +79,21 @@ Eigen::VectorXd compute_g(
             }
         }
 
+        // Check for NaN values
+        if (g.array().isNaN().any()) {
+            std::cout << "NaN values detected in g at iteration " << iter << std::endl;
+            break;
+        }
+
+        // Print debug information
+        if (iter % 100 == 0) {
+            std::cout << "Iteration " << iter << ", Objective: " << total_objective << std::endl;
+            std::cout << "g min: " << g.minCoeff() << ", g max: " << g.maxCoeff() << std::endl;
+        }
+
         // Check for convergence
         if (iter > 0 && std::abs(total_objective - prev_objective) < tolerance) {
+            std::cout << "Converged at iteration " << iter << std::endl;
             break;
         }
 

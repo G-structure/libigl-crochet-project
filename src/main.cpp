@@ -61,16 +61,23 @@ int main(int argc, char *argv[])
       g))
     {
       viewer.data().clear();
-      viewer.data().set_mesh(V_cut, F_cut);
+      viewer.data().set_mesh(V, F);
 
       viewer.data().set_data(D);
       viewer.data().clear_edges();
       // Draw a black segment in direction of gradient at face barycenters
       const Eigen::RowVector3d black(0,0,0);
+      const Eigen::RowVector3d red(1,0,0);
+      const Eigen::RowVector3d green(0,1,0);
+      const Eigen::RowVector3d blue(0,0,1);
+      const Eigen::RowVector3d yellow(1,1,0);
+      const Eigen::RowVector3d magenta(1,0,1);
+      const Eigen::RowVector3d cyan(0,1,1);
       viewer.data().add_edges(BaryCenter,J_Delta_F_arrow, black);
+      // viewer.data().add_edges(BaryCenter,g, green);
 
-      // viewer.data().add_edges(Cut_Path.topRows(Cut_Path.rows()-1), Cut_Path.bottomRows(Cut_Path.rows()-1), Eigen::RowVector3d(1,0,0));
-      viewer.data().add_edges(B.topRows(B.rows()-1), B.bottomRows(B.rows()-1), Eigen::RowVector3d(1,1,0));
+      viewer.data().add_edges(Cut_Path.topRows(Cut_Path.rows()-1), Cut_Path.bottomRows(Cut_Path.rows()-1), Eigen::RowVector3d(1,0,0));
+      // viewer.data().add_edges(B.topRows(B.rows()-1), B.bottomRows(B.rows()-1), Eigen::RowVector3d(1,1,0));
 
       return true;
     }
