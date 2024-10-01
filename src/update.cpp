@@ -31,7 +31,9 @@ bool update(
   Eigen::MatrixXd& GF,
   Eigen::MatrixXd& BaryCenter,
   Eigen::MatrixXd& J_Delta_F_arrow,
-  Eigen::MatrixXd& Cut_Path)
+  Eigen::MatrixXd& Cut_Path,
+  Eigen::MatrixXd & V_cut,
+  Eigen::MatrixXi & F_cut)
 {
   int fid;
   Eigen::Vector3f bc;
@@ -157,8 +159,8 @@ bool update(
     }
 
     // Cut the mesh
-    Eigen::MatrixXd V_cut = V;
-    Eigen::MatrixXi F_cut = F;
+    V_cut = V;
+    F_cut = F;
     Eigen::VectorXi I;
     igl::cut_mesh(V_cut, F_cut, cuts, I);
 
@@ -214,7 +216,6 @@ bool update(
 
     std::cout << "Longest monotone boundary path (B) size: " << B.size() << std::endl;
     std::cout << "Cut path size: " << Cut_Path.rows() << std::endl;
-    // std::cout << "Longest monotone boundary path (B) size: " << B.size() << std::endl;
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     Eigen::MatrixXd N_vertices;
@@ -243,6 +244,7 @@ bool update(
     // Average edge length divided by average gradient (for scaling)
     const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();
     J_Delta_F_arrow = BaryCenter+max_size*GF_rotated;
+    D = D_cut;
     return true;
   }
   return false;

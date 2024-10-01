@@ -21,4 +21,6 @@ bool update(
   Eigen::MatrixXd& GF,
   Eigen::MatrixXd& BaryCenter,
   Eigen::MatrixXd& J_Delta_F_arrow,
-  Eigen::MatrixXd& Cut_Path);
+  Eigen::MatrixXd& Cut_Path,
+  Eigen::MatrixXd & V_cut,
+  Eigen::MatrixXi & F_cut);

@@ -39,6 +39,9 @@ int main(int argc, char *argv[])
     Eigen::MatrixXd BaryCenter;
     Eigen::MatrixXd J_Delta_F_arrow;
     Eigen::MatrixXd Cut_Path;
+    Eigen::MatrixXd V_cut;
+    Eigen::MatrixXi F_cut;
+
     igl::grad(V,F,G);
     if(::update(
       V,F,t,x,y,
@@ -49,8 +52,13 @@ int main(int argc, char *argv[])
       GF,
       BaryCenter,
       J_Delta_F_arrow,
-      Cut_Path))
+      Cut_Path,
+      V_cut,
+      F_cut))
     {
+      viewer.data().clear();
+      viewer.data().set_mesh(V_cut, F_cut);
+
       viewer.data().set_data(D);
       viewer.data().clear_edges();
       // Draw a black segment in direction of gradient at face barycenters
