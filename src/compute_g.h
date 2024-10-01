@@ -9,6 +9,7 @@ Eigen::VectorXd compute_g(
     const Eigen::MatrixXi& F,
     const Eigen::VectorXd& f,
     const Eigen::MatrixXd& GF,
-    const Eigen::MatrixXd& B);
+    const Eigen::MatrixXd& B,
+    const Eigen::SparseMatrix<double>& G);
 
 #endif

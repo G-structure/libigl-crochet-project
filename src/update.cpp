@@ -228,7 +228,7 @@ bool update(
     // Use GF_rotated instead of GF for visualization
     const Eigen::VectorXd GF_mag = GF_rotated.rowwise().norm();
 
-    g = compute_g(V_cut, F_cut, D_cut, GF_rotated, B);
+    g = compute_g(V, F, D, GF_rotated, B, G);
     std::cout << "Computed g. Size: " << g.size() << std::endl;
 
     // Average edge length divided by average gradient (for scaling)

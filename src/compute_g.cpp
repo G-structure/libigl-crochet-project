@@ -1,73 +1,81 @@
 #include "compute_g.h"
 #include <igl/cotmatrix.h>
 #include <igl/grad.h>
+#include <Eigen/Sparse>
+#include <limits>
+#include <cmath>
 
 Eigen::VectorXd compute_g(
     const Eigen::MatrixXd& V,
     const Eigen::MatrixXi& F,
     const Eigen::VectorXd& f,
     const Eigen::MatrixXd& GF,
-    const Eigen::MatrixXd& B)
+    const Eigen::MatrixXd& B,
+    const Eigen::SparseMatrix<double>& G)
 {
+
+    std::cout << "V dimensions: " << V.rows() << "x" << V.cols() << std::endl;
+    std::cout << "F dimensions: " << F.rows() << "x" << F.cols() << std::endl;
+    std::cout << "f dimensions: " << f.rows() << "x" << f.cols() << std::endl;
+    std::cout << "GF dimensions: " << GF.rows() << "x" << GF.cols() << std::endl;
+    std::cout << "B dimensions: " << B.rows() << "x" << B.cols() << std::endl;
+    std::cout << "G dimensions: " << G.rows() << "x" << G.cols() << std::endl;
+
     // Initialize g with random values
     Eigen::VectorXd g = Eigen::VectorXd::Random(V.rows());
 
     // Set g(B) = 0
     for (int i = 0; i < B.rows(); ++i) {
-        int closest_vertex = -1;
-        double min_distance = std::numeric_limits<double>::max();
+        // Find the index of this point in V
         for (int j = 0; j < V.rows(); ++j) {
-            double distance = (V.row(j) - B.row(i)).norm();
-            if (distance < min_distance) {
-                min_distance = distance;
-                closest_vertex = j;
+            if (B.row(i) == V.row(j)) {
+                g(j) = 0;
+                break;  // We found the matching vertex, no need to continue the inner loop
             }
-        }
-        if (closest_vertex != -1) {
-            g(closest_vertex) = 0;
         }
     }
 
     // Compute cotangent Laplacian
     Eigen::SparseMatrix<double> L;
     igl::cotmatrix(V, F, L);
-
-    // Compute gradient operator
-    Eigen::SparseMatrix<double> G;
-    igl::grad(V, F, G);
+    std::cout << "L dimensions: " << L.rows() << "x" << L.cols() << std::endl;
 
     // Gradient descent parameters
     double learning_rate = 0.01;
     int max_iterations = 1000;
     double tolerance = 1e-6;
 
+    double prev_objective = std::numeric_limits<double>::max();
+
     for (int iter = 0; iter < max_iterations; ++iter) {
         // Compute gradient of g
-        Eigen::MatrixXd grad_g = G * g;
+        Eigen::MatrixXd grad_g = Eigen::Map<const Eigen::MatrixXd>((G*g).eval().data(),F.rows(),3);
+
+        std::cout << "grad_g dimensions: " << grad_g.rows() << "x" << grad_g.cols() << std::endl;
 
         // Compute objective function
         Eigen::VectorXd objective = (GF.array() * grad_g.array() - 1).square().rowwise().sum();
+
+        std::cout << "objective dimensions: " << objective.rows() << "x" << objective.cols() << std::endl;
+
         double total_objective = objective.sum();
 
         // Compute gradient of objective function
-        Eigen::VectorXd grad_objective = 2 * G.transpose() * (GF.array() * (GF.array() * grad_g.array() - 1)).matrix();
+        Eigen::MatrixXd temp = (GF.array() * (GF.array() * grad_g.array() - 1)).matrix().reshaped();
+        Eigen::VectorXd grad_objective = 2 * G.transpose() * Eigen::Map<Eigen::VectorXd>(temp.data(), F.rows() * 3, 1);
+        std::cout << "grad_objective dimensions: " << grad_objective.rows() << "x" << grad_objective.cols() << std::endl;
 
         // Update g
         g -= learning_rate * grad_objective;
 
         // Set g(B) = 0 again
         for (int i = 0; i < B.rows(); ++i) {
-            int closest_vertex = -1;
-            double min_distance = std::numeric_limits<double>::max();
+            // Find the index of this point in V
             for (int j = 0; j < V.rows(); ++j) {
-                double distance = (V.row(j) - B.row(i)).norm();
-                if (distance < min_distance) {
-                    min_distance = distance;
-                    closest_vertex = j;
+                if (B.row(i) == V.row(j)) {
+                    g(j) = 0;
+                    break;  // We found the matching vertex, no need to continue the inner loop
                 }
-            }
-            if (closest_vertex != -1) {
-                g(closest_vertex) = 0;
             }
         }
 
