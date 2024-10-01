@@ -20,4 +20,5 @@ bool update(
   const Eigen::SparseMatrix<double>& G,
   Eigen::MatrixXd& GF,
   Eigen::MatrixXd& BaryCenter,
-  Eigen::MatrixXd& J_Delta_F_arrow);
+  Eigen::MatrixXd& J_Delta_F_arrow,
+  Eigen::MatrixXd& Cut_Path);

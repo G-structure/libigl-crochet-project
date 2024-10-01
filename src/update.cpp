@@ -19,7 +19,8 @@ bool update(
   const Eigen::SparseMatrix<double>& G,
   Eigen::MatrixXd& GF,
   Eigen::MatrixXd& BaryCenter,
-  Eigen::MatrixXd& J_Delta_F_arrow)
+  Eigen::MatrixXd& J_Delta_F_arrow,
+  Eigen::MatrixXd& Cut_Path)
 {
   int fid;
   Eigen::Vector3f bc;
@@ -53,6 +54,18 @@ bool update(
         D += Dc*bc(cid);
       }
     }
+
+    // Find the vertex for the smallest and largest D
+    Eigen::MatrixXd extreme_vertices(2, 3);
+    int min_index, max_index;
+    D.minCoeff(&min_index);
+    D.maxCoeff(&max_index);
+    extreme_vertices.row(0) = V.row(min_index);
+    extreme_vertices.row(1) = V.row(max_index);
+
+    std::cout << "Extreme vertices:" << std::endl;
+    std::cout << "Min: " << extreme_vertices.row(0) << std::endl;
+    std::cout << "Max: " << extreme_vertices.row(1) << std::endl;
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     Eigen::MatrixXd N_vertices;

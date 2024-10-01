@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     Eigen::SparseMatrix<double> G;
     Eigen::MatrixXd BaryCenter;
     Eigen::MatrixXd J_Delta_F_arrow;
+    Eigen::MatrixXd Cut_Path;
     igl::grad(V,F,G);
     if(::update(
       V,F,t,x,y,
@@ -47,7 +48,8 @@ int main(int argc, char *argv[])
       G,
       GF,
       BaryCenter,
-      J_Delta_F_arrow))
+      J_Delta_F_arrow,
+      Cut_Path))
     {
       viewer.data().set_data(D);
       viewer.data().clear_edges();
