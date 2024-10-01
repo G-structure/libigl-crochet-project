@@ -4,6 +4,16 @@
 #include <igl/grad.h>
 #include <igl/barycenter.h>
 #include <igl/per_vertex_normals.h>
+#include <igl/cut_mesh.h>
+
+Eigen::MatrixXi path_to_edges(const Eigen::MatrixXd& Cut_Path) {
+    Eigen::MatrixXi edges(Cut_Path.rows() - 1, 2);
+    for (int i = 0; i < Cut_Path.rows() - 1; ++i) {
+        edges(i, 0) = i;
+        edges(i, 1) = i + 1;
+    }
+    return edges;
+}
 
 bool update(
   const Eigen::MatrixXd & V,
@@ -121,6 +131,39 @@ bool update(
     for (int i = 0; i < Cut_Path.rows(); i++) {
         std::cout << Cut_Path.row(i) << std::endl;
     }
+
+    // Convert Cut_Path to edges
+    Eigen::MatrixXi cut_edges = path_to_edges(Cut_Path);
+
+    std::cout << "Cut Edges:" << std::endl;
+    for (int i = 0; i < cut_edges.rows(); i++) {
+        std::cout << "Edge " << i << ": " << cut_edges(i, 0) << " - " << cut_edges(i, 1) << std::endl;
+    }
+
+    // Create cuts matrix
+    Eigen::MatrixXi cuts = Eigen::MatrixXi::Zero(F.rows(), 3);
+    for (int i = 0; i < cut_edges.rows(); ++i) {
+        for (int j = 0; j < F.rows(); ++j) {
+            for (int k = 0; k < 3; ++k) {
+                int v1 = F(j, k);
+                int v2 = F(j, (k + 1) % 3);
+                if ((v1 == cut_edges(i, 0) && v2 == cut_edges(i, 1)) ||
+                    (v1 == cut_edges(i, 1) && v2 == cut_edges(i, 0))) {
+                    cuts(j, k) = 1;
+                }
+            }
+        }
+    }
+
+    // Cut the mesh
+    Eigen::MatrixXd V_cut = V;
+    Eigen::MatrixXi F_cut = F;
+    Eigen::VectorXi I;
+    igl::cut_mesh(V_cut, F_cut, cuts, I);
+
+    std::cout << "Mesh cut along the specified edges." << std::endl;
+    std::cout << "Original mesh: " << V.rows() << " vertices, " << F.rows() << " faces." << std::endl;
+    std::cout << "Cut mesh: " << V_cut.rows() << " vertices, " << F_cut.rows() << " faces." << std::endl;
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     Eigen::MatrixXd N_vertices;
