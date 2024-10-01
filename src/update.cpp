@@ -5,6 +5,7 @@
 #include <igl/barycenter.h>
 #include <igl/per_vertex_normals.h>
 #include <igl/cut_mesh.h>
+#include <igl/boundary_loop.h>
 
 Eigen::MatrixXi path_to_edges(const Eigen::MatrixXd& Cut_Path) {
     Eigen::MatrixXi edges(Cut_Path.rows() - 1, 2);
@@ -164,6 +165,56 @@ bool update(
     std::cout << "Mesh cut along the specified edges." << std::endl;
     std::cout << "Original mesh: " << V.rows() << " vertices, " << F.rows() << " faces." << std::endl;
     std::cout << "Cut mesh: " << V_cut.rows() << " vertices, " << F_cut.rows() << " faces." << std::endl;
+
+    // Create D_cut by mapping D values to the cut mesh vertices
+    Eigen::VectorXd D_cut(V_cut.rows());
+    for (int i = 0; i < V_cut.rows(); ++i) {
+        D_cut(i) = D(I(i));
+    }
+
+    std::cout << "Original D size: " << D.size() << std::endl;
+    std::cout << "D_cut size: " << D_cut.size() << std::endl;
+
+    // Find boundary vertices of the cut mesh
+    Eigen::VectorXi boundary;
+    igl::boundary_loop(F_cut, boundary);
+
+    // Get D values for boundary vertices
+    Eigen::VectorXd D_boundary(boundary.size());
+    for (int i = 0; i < boundary.size(); ++i) {
+        D_boundary(i) = D_cut(boundary(i));
+    }
+
+    // Find the longest monotone path
+    std::vector<int> B;
+    std::vector<int> current_path;
+    bool increasing = true;
+    double prev_value = D_boundary(0);
+
+    for (int i = 0; i < boundary.size(); ++i) {
+        if (D_boundary(i) > prev_value && increasing) {
+            current_path.push_back(boundary(i));
+        } else if (D_boundary(i) < prev_value && !increasing) {
+            current_path.push_back(boundary(i));
+        } else {
+            if (current_path.size() > B.size()) {
+                B = current_path;
+            }
+            current_path.clear();
+            current_path.push_back(boundary(i));
+            increasing = !increasing;
+        }
+        prev_value = D_boundary(i);
+    }
+
+    // Check if the last path is the longest
+    if (current_path.size() > B.size()) {
+        B = current_path;
+    }
+
+    std::cout << "Longest monotone boundary path (B) size: " << B.size() << std::endl;
+    std::cout << "Cut path size: " << Cut_Path.rows() << std::endl;
+    // std::cout << "Longest monotone boundary path (B) size: " << B.size() << std::endl;
 
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
     Eigen::MatrixXd N_vertices;
