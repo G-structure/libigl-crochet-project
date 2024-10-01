@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     Eigen::MatrixXd V_cut;
     Eigen::MatrixXi F_cut;
     Eigen::MatrixXd B;
+    Eigen::VectorXd g;
 
     igl::grad(V,F,G);
     if(::update(
@@ -56,7 +57,8 @@ int main(int argc, char *argv[])
       Cut_Path,
       V_cut,
       F_cut,
-      B))
+      B,
+      g))
     {
       viewer.data().clear();
       viewer.data().set_mesh(V_cut, F_cut);

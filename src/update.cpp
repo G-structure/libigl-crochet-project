@@ -1,4 +1,5 @@
 #include "update.h"
+#include "compute_g.h"
 #include <igl/heat_geodesics.h>
 #include <igl/unproject_onto_mesh.h>
 #include <igl/grad.h>
@@ -34,7 +35,8 @@ bool update(
   Eigen::MatrixXd& Cut_Path,
   Eigen::MatrixXd & V_cut,
   Eigen::MatrixXi & F_cut,
-  Eigen::MatrixXd & B)
+  Eigen::MatrixXd & B,
+  Eigen::VectorXd & g)
 {
   int fid;
   Eigen::Vector3f bc;
@@ -225,6 +227,9 @@ bool update(
 
     // Use GF_rotated instead of GF for visualization
     const Eigen::VectorXd GF_mag = GF_rotated.rowwise().norm();
+
+    g = compute_g(V_cut, F_cut, D_cut, GF_rotated, B);
+    std::cout << "Computed g. Size: " << g.size() << std::endl;
 
     // Average edge length divided by average gradient (for scaling)
     const double max_size = igl::avg_edge_length(V,F) / GF_mag.mean();

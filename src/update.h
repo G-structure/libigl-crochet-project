@@ -24,4 +24,5 @@ bool update(
   Eigen::MatrixXd& Cut_Path,
   Eigen::MatrixXd & V_cut,
   Eigen::MatrixXi & F_cut,
-  Eigen::MatrixXd & B);
+  Eigen::MatrixXd & B,
+  Eigen::VectorXd & g);

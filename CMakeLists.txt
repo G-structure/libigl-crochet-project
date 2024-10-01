@@ -1,13 +1,22 @@
 cmake_minimum_required(VERSION 3.16)
 project(crochet)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
+  add_compile_options(-Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable)
+endif()
 
 # Libigl
 include(libigl)
 
 # Download tutorial data
 include(libigl_tutorial_data)
+
+# Eigen
+include(eigen)
 
 # Enable the target igl::glfw
 igl_include(glfw)
@@ -27,6 +36,21 @@ igl_include(glfw)
 #igl_include(restricted mosek)
 #igl_include(restricted triangle)
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  add_compile_options(-g -O0)
+endif()
+
+# Additional warnings
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
+  add_compile_options(-Wall -Wextra -Wpedantic -Wconversion)
+endif()
+
+# Address sanitizer (optional)
+if(CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
+  add_compile_options(-fsanitize=address)
+  add_link_options(-fsanitize=address)
+endif()
+
 # Add your project files
 file(GLOB SRC_FILES src/*.cpp)
 add_executable(${PROJECT_NAME} ${SRC_FILES})
@@ -35,6 +59,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC
   igl::glfw
   igl::tutorial_data
+  Eigen3::Eigen
   ## Other modules you could link to
   # igl::embree
   # igl::imgui
