@@ -41,8 +41,8 @@ Eigen::VectorXd compute_g(
     std::cout << "L dimensions: " << L.rows() << "x" << L.cols() << std::endl;
 
     // Gradient descent parameters
-    double learning_rate = 0.001;
-    int max_iterations = 1000;
+    double learning_rate = 1e-6;
+    int max_iterations = 10000;
     double tolerance = 1e-6;
 
     double prev_objective = std::numeric_limits<double>::max();
