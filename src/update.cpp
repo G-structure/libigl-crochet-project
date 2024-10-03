@@ -17,6 +17,37 @@ Eigen::MatrixXi path_to_edges(const Eigen::MatrixXd& Cut_Path) {
     return edges;
 }
 
+Eigen::VectorXd computePerVertexGradients(
+    const Eigen::MatrixXd& V, const Eigen::MatrixXi& F,
+    const Eigen::MatrixXd& perFaceGradients) {
+
+    Eigen::VectorXd perVertexGradients = Eigen::VectorXd::Zero(V.rows() * 3);
+    Eigen::VectorXd vertexAreas = Eigen::VectorXd::Zero(V.rows());
+
+    for (int i = 0; i < F.rows(); i++) {
+        Eigen::Vector3d faceGradient = perFaceGradients.row(i);
+        // Compute face area
+        Eigen::Vector3d v1 = V.row(F(i, 1)) - V.row(F(i, 0));
+        Eigen::Vector3d v2 = V.row(F(i, 2)) - V.row(F(i, 0));
+        double faceArea = 0.5 * (v1.cross(v2)).norm();
+
+        for (int j = 0; j < 3; j++) {
+            int vId = F(i, j);
+            perVertexGradients.segment<3>(vId * 3) += faceGradient * faceArea;
+            vertexAreas(vId) += faceArea;
+        }
+    }
+
+    // Normalize
+    for (int i = 0; i < V.rows(); i++) {
+        if (vertexAreas(i) > 0) {
+            perVertexGradients.segment<3>(i * 3) /= vertexAreas(i);
+        }
+    }
+
+    return perVertexGradients;
+}
+
 bool update(
   const Eigen::MatrixXd & V,
   const Eigen::MatrixXi & F,
@@ -203,8 +234,9 @@ bool update(
             std::cout << "Vertex " << i << ": Not found in V_cut" << std::endl;
         }
     }
-
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
+    Eigen::MatrixXd GV = Eigen::Map<Eigen::MatrixXd>(computePerVertexGradients(V, F, GF).data(), V.rows(), 3);
+    std::cout << "Shape of GV: " << GV.rows() << " x " << GV.cols() << std::endl;
     Eigen::MatrixXd N_vertices;
     igl::per_vertex_normals(V, F, N_vertices);
 
