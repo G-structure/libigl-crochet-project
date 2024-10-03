@@ -18,11 +18,14 @@ include(libigl_tutorial_data)
 # Eigen
 include(eigen)
 
+# Imgui
+#include(imgui)
+
 # Enable the target igl::glfw
 igl_include(glfw)
 # Other modules you could enable
 #igl_include(embree)
-#igl_include(imgui)
+igl_include(imgui)
 #igl_include(opengl)
 #igl_include(stb)
 #igl_include(predicates)
@@ -62,7 +65,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
   Eigen3::Eigen
   ## Other modules you could link to
   # igl::embree
-  # igl::imgui
+  igl::imgui
   # igl::opengl
   # igl::stb
   # igl::predicates

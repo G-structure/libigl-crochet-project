@@ -7,11 +7,16 @@
 #include <iostream>
 #include <igl/avg_edge_length.h>
 #include <igl/grad.h>
+#include <igl/opengl/glfw/imgui/ImGuiPlugin.h>
+#include <igl/opengl/glfw/imgui/ImGuiMenu.h>
+#include <igl/opengl/glfw/imgui/ImGuiHelpers.h>
 
 int main(int argc, char *argv[])
 {
   Eigen::MatrixXi F;
   Eigen::MatrixXd V;
+  Eigen::VectorXd D;
+  Eigen::VectorXd g;
   igl::read_triangle_mesh( argc>1?argv[1]: TUTORIAL_SHARED_PATH "/sphere.obj",V,F);
   double t = std::pow(igl::avg_edge_length(V,F),2);
 
@@ -28,12 +33,18 @@ int main(int argc, char *argv[])
   precompute();
 
   igl::opengl::glfw::Viewer viewer;
+
+  // Attach a menu plugin
+  igl::opengl::glfw::imgui::ImGuiPlugin plugin;
+  viewer.plugins.push_back(&plugin);
+  igl::opengl::glfw::imgui::ImGuiMenu menu;
+  plugin.widgets.push_back(&menu);
+
   bool down_on_mesh = false;
   const auto update = [&]()->bool
   {
     const double x = viewer.current_mouse_x;
     const double y = viewer.core().viewport(3) - viewer.current_mouse_y;
-    Eigen::VectorXd D;
     Eigen::MatrixXd GF;
     Eigen::SparseMatrix<double> G;
     Eigen::MatrixXd BaryCenter;
@@ -42,7 +53,6 @@ int main(int argc, char *argv[])
     Eigen::MatrixXd V_cut;
     Eigen::MatrixXi F_cut;
     Eigen::MatrixXd B;
-    Eigen::VectorXd g;
 
     igl::grad(V,F,G);
     if(::update(
@@ -140,6 +150,28 @@ int main(int argc, char *argv[])
       break;
     }
     return true;
+  };
+
+  // Draw additional windows
+  menu.callback_draw_custom_window = [&]()
+  {
+    // Define next window position + size
+    ImGui::SetNextWindowPos(ImVec2(180.f * menu.menu_scaling(), 10), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(200, 160), ImGuiCond_FirstUseEver);
+    ImGui::Begin(
+        "New Window", nullptr,
+        ImGuiWindowFlags_NoSavedSettings
+    );
+
+    // Expose the same variable directly ...
+    ImGui::PushItemWidth(-80);
+    // ImGui::DragScalar("double", ImGuiDataType_Double, &doubleVariable, 0.1, 0, 0, "%.4f");
+    ImGui::PopItemWidth();
+
+    // static std::string str = "bunny";
+    // ImGui::InputText("Name", str);
+
+    ImGui::End();
   };
 
   // Show mesh
