@@ -55,7 +55,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES GNU|Clang)
 endif()
 
 # Add your project files
-file(GLOB SRC_FILES src/*.cpp)
+file(GLOB SRC_FILES src/crochet/*.cpp)
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 # Link igl (and the glfw module) to your project
