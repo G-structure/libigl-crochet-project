@@ -235,8 +235,8 @@ bool update(
         }
     }
     GF = Eigen::Map<const Eigen::MatrixXd>((G*D).eval().data(),F.rows(),3);
-    Eigen::MatrixXd GV = Eigen::Map<Eigen::MatrixXd>(computePerVertexGradients(V, F, GF).data(), V.rows(), 3);
-    std::cout << "Shape of GV: " << GV.rows() << " x " << GV.cols() << std::endl;
+    Eigen::MatrixXd GF_vertex = Eigen::Map<Eigen::MatrixXd>(computePerVertexGradients(V, F, GF).data(), V.rows(), 3);
+    std::cout << "Shape of: " << GF_vertex.rows() << " x " << GF_vertex.cols() << std::endl;
     Eigen::MatrixXd N_vertices;
     igl::per_vertex_normals(V, F, N_vertices);
 
