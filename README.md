@@ -1,3 +1,20 @@
+# Computational Crochet Pattern Generator
+We are trying to implement this paper: [AmiGo: Computational Design of Amigurumi Crochet Patterns](./docs/amigo.pdf)
+
+## Building
+Download libigl in the directory one level up from this one (i.e., ../) and compile libigl:
+```
+cd ../
+git clone https://github.com/libigl/libigl.git
+```
+Then link it to this project. From this project's directory:
+```
+mkdir build
+cd build
+cmake -DFETCHCONTENT_SOURCE_DIR_LIBIGL=/path/to/your/libigl/ ../
+make
+```
+
 # libigl example project
 
 A blank project example showing how to use libigl and cmake. Feel free and
@@ -26,7 +43,7 @@ A glfw app should launch displaying a 3D cube.
 ## Using other modules of libigl
 
 This example project uses the `igl::opengl::glfw::Viewer`, therefore it requires
-the glfw module of libigl. This shows up in the CMakeLists.txt 
+the glfw module of libigl. This shows up in the CMakeLists.txt
 
 ```cmake
 igl_include(glfw)

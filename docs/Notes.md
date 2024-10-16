@@ -1,0 +1,11 @@
+- [x] calc geodesic distance (d)
+- [x] from d find row order (f)
+- [x] calc col order (d)
+  - [ ] cut mesh
+    - [x] calc geodesic from min_d to max_d using edge flip
+    - [ ] from each row find point which intersects geodesic (S)
+    - [ ] cut mesh along S
+    - [ ] find longest boundary path (B) which does not include points from S, motonically increasing
+  - [x] calc Δf
+  - [x] rotate Δf by two pi in the plane tangent to point p
+  - [ ]
