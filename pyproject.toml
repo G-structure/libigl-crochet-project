@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "crochet-plot"
+version = "0.1.0"
+description = ""
+authors = ["Luc Chartier <luc@sanative.ai>"]
+readme = "README.md"
+packages = [{include = "crochet_plot", from="src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+matplotlib = "^3.9.2"
+pandas = "^2.2.3"
+
+[tool.poetry.scripts]
+plot = "crochet_plot.plot:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

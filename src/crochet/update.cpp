@@ -278,6 +278,15 @@ bool update(
     std::cout << "Shape of G: " << G.rows() << " x " << G.cols() << std::endl;
     std::cout << "Shape of GF: " << GF.rows() << " x " << GF.cols() << std::endl;
     std::cout << "Shape of GF_rotated: " << GF_rotated.rows() << " x " << GF_rotated.cols() << std::endl;
+
+    // Write D and g values to a CSV file
+    std::ofstream csvFile("D_and_g_values.csv");
+    csvFile << "D,g" << std::endl;
+    for (int i = 0; i < D.size(); ++i) {
+        csvFile << D[i] << "," << g[i] << std::endl;
+    }
+    csvFile.close();
+    std::cout << "D and g values written to D_and_g_values.csv" << std::endl;
     return true;
   }
   return false;

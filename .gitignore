@@ -31,4 +31,8 @@
 *.swo
 *.swp
 
+# CPP
 build/*
+
+# Python
+**/__pycache__/
