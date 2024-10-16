@@ -1,0 +1,39 @@
+[
+  {
+    "label": "Setup Build Folder",
+    "command": "bash",
+    "args": [
+      "-c",
+      "if [ \"$1\" == \"--clean\" ] && [ -d build ]; then rm -rf build; fi; mkdir build; cd build; cmake -DFETCHCONTENT_SOURCE_DIR_LIBIGL=${ZED_WORKTREE_ROOT}/../libigl ../"
+    ],
+    "cwd": "${ZED_WORKTREE_ROOT}",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "never",
+    "shell": "system",
+    "args": ["--clean"]
+  }
+  // {
+  //   "label": "Compile and Run Project",
+  //   "command": "bash",
+  //   "args": ["-c", "cd build && make && ./crochet"],
+  //   "cwd": "${ZED_WORKTREE_ROOT}",
+  //   "use_new_terminal": false,
+  //   "allow_concurrent_runs": false,
+  //   "reveal": "always",
+  //   "hide": "never",
+  //   "shell": "system"
+  // },
+  // {
+  //   "label": "Copy Staged Git Diff to Clipboard",
+  //   "command": "git diff --cached | xclip -selection clipboard",
+  //   "env": {},
+  //   "cwd": "${ZED_WORKTREE_ROOT}",
+  //   "use_new_terminal": false,
+  //   "allow_concurrent_runs": false,
+  //   "reveal": "always",
+  //   "hide": "never",
+  //   "shell": "system"
+  // }
+]
