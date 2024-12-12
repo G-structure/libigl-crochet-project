@@ -1,19 +1,29 @@
-[tool.poetry]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
 name = "crochet-plot"
 version = "0.1.0"
 description = ""
-authors = ["Luc Chartier <luc@sanative.ai>"]
+authors = [
+  { name = "Luc Chartier", email = "luc@sanative.ai" }
+]
 readme = "README.md"
-packages = [{include = "crochet_plot", from="src"}]
+requires-python = ">=3.10"
+dependencies = [
+  "matplotlib>=3.9.2",
+  "pandas>=2.2.3"
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-matplotlib = "^3.9.2"
-pandas = "^2.2.3"
-
-[tool.poetry.scripts]
+[project.scripts]
 plot = "crochet_plot.plot:main"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.hatch.build.targets.sdist]
+packages = ["src/crochet_plot"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/crochet_plot"]
+
+[tool.hatch.envs.default]
+sources = ["src"]
