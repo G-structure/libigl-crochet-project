@@ -1,5 +1,5 @@
 # Computational Crochet Pattern Generator
-We are trying to implement this paper: [AmiGo: Computational Design of Amigurumi Crochet Patterns](./docs/amigo.pdf)
+(WIP) We are trying to implement this paper: [AmiGo: Computational Design of Amigurumi Crochet Patterns](./docs/amigo.pdf)
 
 ## Building
 Download libigl in the directory one level up from this one (i.e., ../) and compile libigl:
